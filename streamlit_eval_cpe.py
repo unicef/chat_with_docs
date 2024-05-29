@@ -19,15 +19,16 @@ from io import BytesIO
 
 
 # Azure Storage Account details
-azure_storage_account_name = "xxx"
-azure_storage_account_key = "xxx"
-container_name = "xxx"
-connection_string_blob="xxx"
+azure_storage_account_name = st.secrets.azure_storage_account_name
+azure_storage_account_key = st.secrets.azure_storage_account_key
+container_name = st.secrets.container_name
+connection_string_blob =st.secrets.connection_string_blob
 
 # Password checks to grant access only to UNICEF staff
 st.title("Chat with your documents 📚 🗣️")
-password_unicef ='test'
+password_unicef =st.secrets.password_unicef
 password_input = st.text_input("Enter a password", type="password")
+
 
     
 if password_input==password_unicef:
@@ -57,12 +58,19 @@ if password_input==password_unicef:
 
     #########
 
+
+
     ######### NEW FEATURES
     ## ADD a list of models to choose from 
+    ## GPT 4, 4o, 3.5 turbo
     ## LLama 3 and 4
     #########
     ## return the list of documents loaded in context 
 
+    #########
+    ##WAIT UNTILL THE DOCUMENTS ARE LOADED 
+    ## SHOW A SPINNER
+    #########
 
     # choose model from a list 
     model_variable = st.selectbox("Choose a model", ["gpt-4", "gpt-4o", "gpt-3.5-turbo"])
@@ -75,6 +83,8 @@ if password_input==password_unicef:
             {"role": "assistant", "content": "Ask me a question about the documents you uploaded!"}
         ]
                                                             
+
+
     @st.cache_resource(show_spinner=True)
     def load_data(llm_model):
         with st.spinner(text="Loading and indexing the provided docs – hang tight! This should take a couple of minutes."):
@@ -92,6 +102,7 @@ if password_input==password_unicef:
             index = VectorStoreIndex.from_documents(docs, service_context=service_context)
             return index
 
+
     index = load_data(model_variable)
     st.success("Documents loaded and indexed successfully!")
 
@@ -100,6 +111,9 @@ if password_input==password_unicef:
         load_data.clear()
         index = load_data(model_variable)
         st.success("New documents loaded and indexed successfully!")
+
+
+
 
     chat_engine = index.as_chat_engine(chat_mode="condense_question", verbose=True)
 
